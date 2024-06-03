@@ -57,7 +57,7 @@ const routes = [
     },
   },
   {
-    path: '/create-latex',
+    path: "/create-latex",
     name: 'create-latex',
     component: CreateLatex,
     meta: {

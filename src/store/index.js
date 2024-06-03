@@ -53,6 +53,7 @@ export default createStore({
     profileLastName: null,
     profileId: null,
     profileInitials: null,
+    projects: [],
   },
   getters: {
   },
@@ -61,11 +62,48 @@ export default createStore({
       state.editPost = payload;
       console.log(state.editPost);
     },
+    setProfileInfo(state, payload) {
+      state.profileId = payload.UserId;
+      state.profileFirstName = payload.FirstName;
+      state.profileLastName = payload.LastName;
+      state.profileEmail = payload.Email;
+      state.profileInitials = state.profileFirstName[0] + state.profileLastName[0];
+      state.user = true;
+      console.log(state.profileInitials);
+    },
+    signOutCurrentUser(state) {
+      state.profileId = "";
+      state.profileFirstName = "";
+      state.profileLastName = "";
+      state.profileEmail = "";
+      state.profileInitials = "";
+      state.user = false;
+      console.log("sign out");
+    },
+    setUserProjects(state, projects) {
+      state.projects = projects;
+    }
   },
   actions: {
-    async getCurrentUser({commit}) {
-      
+    async getCurrentUser({ commit }, user) {
+      commit('setProfileInfo', user);
+      this.dispatch('getProject');
     },
+    async getProject({ commit }) {
+      await fetch('http://localhost:5237/api/project/2')
+      .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
+      .then(data => {
+        commit('setUserProjects', data);
+      })
+      .catch(error => {
+        console.error('There was a problem with the fetch operation:', error);
+      });
+    }
   },
   modules: {
   }

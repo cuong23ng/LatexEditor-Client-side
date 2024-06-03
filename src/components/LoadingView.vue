@@ -12,12 +12,13 @@ export default {
 
 <style lang="scss">
 .loading {
+  position: absolute;
   top: 0;
-  z-index: 101;
+  z-index: 5000;
+  margin-left: 2px;
   height: 100%;
   width: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-  position: fixed;
+  background-color: rgba(0, 0, 0, 0.6);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -27,6 +28,7 @@ export default {
     }
   }
   span {
+    position: fixed;
     display: block;
     width: 60px;
     height: 60px;

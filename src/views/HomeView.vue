@@ -1,16 +1,13 @@
 <template>
   <div class="home">
-    <BlogPost :post="welcomeScreen" />
+    <BlogPost v-if="!user" :post="welcomeScreen" />
     <div class="blog-card-wrap">
       <div class="container">
         <h3>View More Recent Documents</h3>
-        <div class="document-cards">
-          <DocumentCards :post="post" v-for="(post, index) in sampleDocumentCards" :key="index" />
-        </div>
         <router-link class="document-card" style="text-decoration: none; align-self: center;" :to="{name: 'documents'}">...</router-link>
       </div>
     </div>
-    <div class="updates">
+    <div v-if="!user" class="updates">
       <div class="container">
         <h2></h2>
         <router-link class="router-button" :to="{name: 'register'}">
@@ -27,7 +24,7 @@ import BlogPost from "../components/BlogPost"
 import BlogCards from "../components/BlogCard"
 import DocumentCards from "../components/DocumentCard.vue"
 export default {
-  name: 'HomeView',
+  name: 'home',
   components: { 
     BlogPost, 
     BlogCards, 
@@ -61,7 +58,10 @@ export default {
     },
     sampleDocumentCards() {
       return this.$store.state.sampleDocumentCards
-    }
+    },
+    user() {
+      return this.$store.state.user;
+    },
   }
 }
 </script>

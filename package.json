@@ -22,8 +22,6 @@
     "vue": "^3.4.27",
     "vue-loader": "^17.4.2",
     "vue-router": "^4.0.3",
-    "vue-svg-loader": "^0.16.0",
-    "vue-template-compiler": "^2.7.16",
     "vue3-ace-editor": "^2.2.4",
     "vue3-editor": "^0.1.1",
     "vuex": "^4.0.0"
@@ -32,6 +30,8 @@
     "@vue/cli-plugin-babel": "~5.0.0",
     "@vue/cli-plugin-router": "~5.0.0",
     "@vue/cli-plugin-vuex": "~5.0.0",
-    "@vue/cli-service": "~5.0.0"
+    "@vue/cli-service": "~5.0.0",
+    "vue-svg-loader": "^0.16.0",
+    "vue-template-compiler": "^2.7.16"
   }
 }

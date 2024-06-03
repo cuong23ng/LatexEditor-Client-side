@@ -10,5 +10,5 @@ module.exports = {
       // Languages are loaded on demand at runtime
       languages: ['javascript', 'css', 'html', 'typescript']
     })
-  ]
+  ],
 }

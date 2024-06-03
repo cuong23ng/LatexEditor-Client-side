@@ -8,10 +8,10 @@
       <h2>Login to HUS<span style="color: red;">Tex</span></h2>
       <div class="inputs">
         <div class="input">
-          <input type="text" placeholder="Email" v-model="email">
+          <input name="username" type="text" placeholder="Username" v-model="username">
         </div>
         <div class="input">
-          <input type="password" placeholder="Password" v-model="password">
+          <input name="password" type="password" placeholder="Password" v-model="password">
         </div>
         <div v-show="error" class="error">{{ this.errorMsg }}</div>
       </div>
@@ -24,32 +24,55 @@
 </template>
 
 <script>
-import firebase from "firebase/app";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth, colRef } from "../firebase/firebaseInit.js";
 
 export default {
   name: 'login',
   data() {
     return {
-      email: "",
+      username: "",
       password: "",
       error: null,
       errorMsg: ""
     }
   },
   methods: {
-    signIn() {
-      signInWithEmailAndPassword(auth, this.email, this.password)
-        .then(() => {
-          this.$router.push({ name: "home" });
-          this.error = false;
-          this.errorMsg = "";
+    async signIn() {
+      const formEl = document.querySelector('.login');
+      if (this.password !== "" && this.username !== "") {
+        const formData = new FormData(formEl);
+        const user = new URLSearchParams(formData);
+
+        fetch('http://localhost:5237/api/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: user
+        }).then((res) => {
+          if (res.status === 200) {
+            this.$router.push({ name: "home" });
+            this.error = false;
+            this.errorMsg = "";
+            return res.json();
+          }
+          else {
+            this.error = true;
+            this.errorMsg = "Username or password does not exist!!";
+            return;
+          }
+        })
+        .then(data => {
+          this.$store.dispatch("getCurrentUser", data);
         })
         .catch((err) => {
           this.error = true;
           this.errorMsg = err.message;
-        })
+        });
+        return;
+      }
+      this.error = true;
+      this.errorMsg = "Please fill out all the fields";
+      return;
     }
   }
 }

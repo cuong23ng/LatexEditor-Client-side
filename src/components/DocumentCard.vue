@@ -1,15 +1,15 @@
 <template>
   <div class="document-card">
-    <router-link to="#" class="title">{{ post.title }}</router-link>
-    <div class="owner-name">{{ post.owner }}</div>
-    <div class="time-modified">{{ post.lastModified }}</div>
+    <router-link :to="{ name: 'create-latex', query: {projectid: project.ProjectId} }" class="title">{{ project.ProjectName }}</router-link>
+    <div class="owner-name">{{ project.UserId }}</div>
+    <div class="time-modified">{{ new Date(project.LastModified).toLocaleString("en-us", { dateStyle: "long" }) }}</div>
   </div>
 </template>
 
 <script>
 export default {
   name: "documentCard",
-  props: ["post"],
+  props: ["project"],
   components: { },
 }
 </script>

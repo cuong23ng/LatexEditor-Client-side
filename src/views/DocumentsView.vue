@@ -6,24 +6,27 @@
       <div style="flex: 4">Owner</div>
       <div style="flex: 3; margin-right: 2px;">Last Modified</div>
     </div>
-    <DocumentCards :post="post" v-for="(post, index) in sampleDocumentCards" :key="index" />
+    <DocumentCards :project="project" v-for="(project, index) in projects" :key="index" />
   </div>
 </template>
 
-<script>
+<script setup>
 import DocumentCards from '@/components/DocumentCard.vue';
+import { computed } from 'vue'
+import { useStore } from 'vuex';
+
+const store = useStore();
+const projects = computed(() => {
+  return store.state.projects;
+});
+</script>
+
+<script>
 export default {
   name: "documents",
-  components: {
-    DocumentCards,
-  },
-  computed: {
-    sampleDocumentCards() {
-      return this.$store.state.sampleDocumentCards;
-    }
-  }
 }
 </script>
+
 
 <style lang="scss" scoped>
 .document-cards {

@@ -1,26 +1,101 @@
 <script setup>
-    import { ref } from 'vue';
+    import { ref, onMounted, onBeforeUnmount, defineProps, computed, watch, toRef } from 'vue';
     import { VAceEditor } from 'vue3-ace-editor';
     import 'ace-builds/src-noconflict/mode-latex'; // Load the language definition file used below
     import 'ace-builds/src-noconflict/theme-textmate'; // Load the theme definition file used below
+    import { useStore } from 'vuex';
 
-    const content = ref('\\documentclass{article}\n\\usepackage[utf8]{vietnam}\n\\usepackage{hyperref}\n\\usepackage{graphicx}\n\\usepackage{subfigure}\n\\usepackage[short]{datetime}\n\\title{\huge{Đề thi Kiến Thức Máy tính lớp Công nghệ thông tin Việt Pháp \\\ngày 22/2/2022 kỳ 20211-IT2120}}\n\\author{\LARGE{Nguyễn Hùng Cường \\\ 20215264}}\n\\date{\LARGE{\\today}}\n\n\n\\begin{document}\n\\maketitle\n\\pagenumbering{roman}\n\n\n\\section{Cách tính điểm của bài thi}\n\\begin{itemize}\n\\item Dịch được file (0,5 điểm)\n\\item 03 dòng tiêu đề mỗi dòng 0,25 điểm\n\\item Định dạng đúng (0,5 điểm)\n\\item Sectioning (0,75 điểm)\n\\item Math (2 điểm): biểu diễn được hàm số (1 điểm). Biểu diễn được công thức tính (1 điểm)\n\\item Table ( 1,5 điểm): bảng đầu 0,5 điểm, bảng sau 1 điểm\n\\item Figure (1,5 điểm): figure đầu 0,5 điểm, figure sau 1 điểm\n\\item Tạo itemize và enumerate (0,5 điểm)\n\\item Phụ lục (0,5 điểm)\n\\item Cross Ref (0,5 điểm)\n\\item Tạo mục lục và các danh sách (1 điểm): mục lục (0,5 điểm), danh sách hình (0,25 điểm), danh sách bảng (0,25 điểm)\n\\end{itemize}\n\\end{document}\n\n\n\n\n');
+    const height = ref((window.innerHeight - 40) + 'px');
+    let timeoutId;
+
+    const props = defineProps({
+        content: {
+            type: String,
+        },
+        projectid: {
+            type: String,
+        },
+        filename: {
+            type: String,
+        },
+    });
+
+    const store = useStore();
+    var oldFilename = '';
+
+    const contentCurrent = ref('');
+    const contentCurrento = toRef(props, 'content');
+    watch(contentCurrento, (value) => {
+        contentCurrent.value = contentCurrento.value;
+    });
+
+    
+
+    function updateHeight() {
+        height.value = (window.innerHeight - 40) + 'px';
+    }
+
+    onMounted(() => {
+        contentCurrent.value = contentCurrento.value;
+        window.addEventListener('resize', updateHeight);
+        updateHeight(); // Set initial height
+    });
+
+    onBeforeUnmount(() => {
+        window.removeEventListener('resize', updateHeight);
+    });
+
+    async function saveContent(content) {
+        var url = "http://localhost:5237/api/save/" + store.state.profileId + "/" + props.projectid + "/" + props.filename;
+        console.log(url); 
+        await fetch(url, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(content._rawValue)
+        }).then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+        })
+        .catch(error => {
+            console.error('There was a problem with the fetch operation:', error);
+        });
+    }
+
+    function debounce(func, delay) {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(func, delay);
+    }
+    
+    watch(contentCurrent, (newValue, oldValue) => {
+        if (oldFilename === props.filename) {
+            debounce(() => {
+                saveContent(contentCurrent);
+            }, 1000);
+        }
+        else {
+            oldFilename = props.filename
+        }
+    });
 </script>
 
 <template>
     <v-ace-editor
-        v-model:value="content"
+        id="editor-1"
+        v-model:value="contentCurrent"
         lang="latex"
         theme="textmate"
-        wrap="true"
+        :wrap="true"
         class="ace-editor"
-              
+        :style="{ height: height }"
+        :readonly="false"
     />
 </template>
 
 <style scoped>
   .ace-editor {
-      height: 100%;
       font-size: 15px; 
   }
 </style>

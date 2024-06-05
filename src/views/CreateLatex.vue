@@ -1,31 +1,35 @@
 <template>
   <div class="latex-editor-window">
+    <ProjectSetting v-if="modalActive" v-on:change-mode="changeModeModal" v-on:create="createNewFile" v-on:import="importFile" :choseNewFile="isNewfile"/>
     <div class="file-info">
       File info
     </div>
     <div class="create-document" :style="{ height: height }">
       <div class="left-column">
-        <div class="file"></div>
-        <div @click.prevent="showFile(file)" class="file" v-for="(file, index) in files" :key="index">
-          <img v-if="file.DataType === 'tex'" class="icon-file" src="../assets/Icons/file.png" >
-          <img v-else-if="file.DataType === 'pdf'" class="icon-file" src="../assets/Icons/image-icon.png">
-          <img v-else-if="file.DataType === 'bib'" class="icon-file" src="../assets/Icons/bib.png">
-          {{ file.FileName }}.{{ file.DataType }}
-        </div>
         <div class="setting">
-          <div @click.prevent="createNewFile()" title="New File">
+          <div @click.prevent="changeModeModal(true)" title="New File">
             <img class="icon-setting" src="../assets/Icons/file.png" alt="New file">
           </div>
           <div title="New Folder">
             <img class="icon-setting" src="../assets/Icons/folder.png" alt="New folder">
           </div>
-          <div title="Import file">
+          <div @click.prevent="changeModeModal(false)" title="Import file">
             <img class="icon-setting" src="../assets/Icons/import-file.png" alt="Import">
           </div>
+          <div @click.prevent="deleteFile" title="Delete">
+            <img class="icon-setting" src="../assets/Icons/delete.png" alt="Delete">
+          </div>
+        </div>
+        <div class="file"></div>
+        <div @click.prevent="showFile(file)" class="file" :id="file.FileName" v-for="(file, index) in files" :key="index">
+          <img v-if="file.DataType === 'pdf'" class="icon-file" src="../assets/Icons/image-icon.png">
+          <img v-else-if="file.DataType === 'bib'" class="icon-file" src="../assets/Icons/bib.png">
+          <img v-else class="icon-file" src="../assets/Icons/file.png" >
+          {{ file.FileName }}.{{ file.DataType }}
         </div>
       </div>
       <div class="editor">
-        <AceEditor v-if="isTexFile" :content="content" :projectid="projectid" :filename="currentFile" />
+        <AceEditor v-if="isTexFile" :content="content" :projectid="projectid" :filename="currentFile.FileName"/>
         <PreviewView class="show-image" v-if="isPdfFile" :address="content"/>
       </div>
       <div class="preview">
@@ -42,6 +46,7 @@
 import AceEditor from "../components/AceEditor.vue";
 import PreviewView from "../components/PreviewView.vue";
 import Loading from "../components/LoadingView.vue";
+import ProjectSetting from "../components/ProjectSetting.vue";
 
 export default {
   name: "CreateLatex",
@@ -53,15 +58,19 @@ export default {
       files: [],
       isTexFile: false,
       isPdfFile: false,
+      previousFile: null,
       currentFile: null,
       projectid: this.$route.query['projectid'],
       loading: null,
+      modalActive: false,
+      isNewfile: null,
     }
   },
   components: {
     AceEditor,
     PreviewView,
     Loading,
+    ProjectSetting,
   },
   async created() {
     var url = 'http://localhost:5237/api/project/' + this.$store.state.profileId + '/' + this.$route.query['projectid'];
@@ -95,7 +104,7 @@ export default {
     async compile() {
       this.loading = true;
       this.address = '';
-      var url = 'http://localhost:5237/api/compile/' + this.$store.state.profileId + '/' + this.$route.query['projectid'] + '/' + this.currentFile;
+      var url = 'http://localhost:5237/api/compile/' + this.$store.state.profileId + '/' + this.$route.query['projectid'] + '/' + this.currentFile.FileName;
       await fetch(url, {
           method: 'GET',
           headers: {
@@ -106,7 +115,7 @@ export default {
           if (!res.ok) {
             throw new Error('Network response was not ok');
           } 
-          this.address = 'http://localhost:5237/Files/' + this.$store.state.profileId + '/' + this.$route.query['projectid'] + '/' + this.currentFile + '.pdf';
+          this.address = 'http://localhost:5237/Files/' + this.$store.state.profileId + '/' + this.$route.query['projectid'] + '/' + this.currentFile.FileName + '.pdf';
           console.log(this.address);
         })
         .catch((err) => {
@@ -116,31 +125,117 @@ export default {
     },
     async showFile(file) {
       try {
-        var url = 'http://localhost:5237/Files/' + this.$store.state.profileId + '/' + this.$route.query['projectid'] + '/' + file.FileName + '.' + file.DataType;
+        this.previousFile = this.currentFile;
+        if (this.previousFile) {
+          document.getElementById(this.previousFile.FileName).classList.remove('highlight-file');
+        }
+        this.currentFile = file;
+        document.getElementById(this.currentFile.FileName).classList.add('highlight-file');
+
+        var url = 'http://localhost:5237/Files/' + this.$store.state.profileId + '/' + this.$route.query['projectid'] + '/' + this.currentFile.FileName + '.' + this.currentFile.DataType;
+
         const response = await fetch(url, {
           method: 'GET',
         });
 
         if (!response.ok) {
           throw new Error('Network response was not ok');
-        } 
-        else if (file.DataType === 'tex') {
-          this.content = await response.text();
-          this.isTexFile = true;
-          this.isPdfFile = false;
-          this.currentFile = file.FileName;
-        }
-        else if (file.DataType === 'pdf') {
-          this.content = url;
-          this.isPdfFile = true;
-          this.isTexFile = false;
+        } else {
+          if (this.currentFile.DataType === 'pdf') {
+            this.content = url;
+            this.isPdfFile = true;
+            this.isTexFile = false;
+          }
+          else {
+            this.content = await response.text();
+            console.log(this.content);
+            this.isTexFile = true;
+            this.isPdfFile = false;
+          }
         }
       } catch (error) {
         console.error('There was a problem with the fetch operation:', error);
       }
     },
-    async createNewFile() {
+    async createNewFile(filename, filetype) {
+      this.changeModeModal();
+      try {
+        var url = `http://localhost:5237/api/create-new-file/${this.$store.state.profileId}/${this.$route.query['projectid']}?filename=${filename}&filetype=${filetype}`;
 
+        console.log(url);
+        const response = await fetch(url, {
+          method: "POST",
+        });
+
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        else {
+          const newfile = {
+            FileName: filename,
+            ProjectId: this.projectid,
+            DataType: filetype
+          };
+          this.files.push(newfile);
+        } 
+      } catch (error) {
+        console.error('There was a problem with the fetch operation:', error);
+      }  
+    },
+    async deleteFile() {
+      try {
+        var url = `http://localhost:5237/api/delete-file/${this.$store.state.profileId}/${this.$route.query['projectid']}?filename=${this.currentFile.FileName}&filetype=${this.currentFile.DataType}`;
+
+        const response = await fetch(url, {
+          method: "DELETE",
+        });
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        else {
+          document.getElementById(this.currentFile.FileName).classList.remove('highlight-file');
+          this.files = this.files.filter((file) => {
+            return file !== this.currentFile;
+          });
+          this.previousFile = null;
+          this.currentFile = null;
+          this.content = '';
+          this.isPdfFile = false;
+          this.isTexFile = false;
+        }
+      }
+      catch (error) {
+        console.error('There was a problem with the fetch operation:', error);
+      }
+    },
+    async importFile(file) {
+      this.changeModeModal();
+      var url = `http://localhost:5237/api/import/${this.$store.state.profileId}/${this.$route.query['projectid']}`;
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await fetch(url, {
+        method: "POST",
+        body: formData
+      });
+
+      if (!response.ok) {
+        throw new Error('Upload failed');
+      }
+      else {
+        const filename = file.name.split('.');
+        const newfile = {
+          FileName: filename[0],
+          ProjectId: this.projectid,
+          DataType: filename[1]
+        };
+        this.files.push(newfile);
+      } 
+    },
+    changeModeModal(isNewfile) {
+      this.modalActive = !this.modalActive;
+      this.isNewfile = isNewfile;
     }
   },
 };
@@ -149,16 +244,18 @@ export default {
 <style lang="scss" scoped>
 .latex-editor-window {
   font-family: 'Arial';
+  position: relative;
 }
 
 .file-info {
-  position: fixed;
+  position: absolute;
   top: 0;
   left: 0;
   right: 0;
   height: 40px;
   background-color: bisque;
   border-bottom-width: 1px;
+  border-bottom-color: rgba(53, 53, 53, 0.6);
   border-bottom-style: solid;
   z-index: 1000;
 }
@@ -190,6 +287,10 @@ export default {
   padding-left: 7px;
   border-radius: 2px;
   transition: 0.8ms;
+}
+
+.highlight-file {
+  background-color: rgba(15, 99, 167, 1);
 }
 
 .icon-file {

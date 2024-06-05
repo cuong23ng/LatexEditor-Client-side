@@ -8,7 +8,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount, watch, defineProps } from 'vue';
+import { ref, onMounted, onBeforeUnmount, watch } from 'vue';
 import PDFPreview from "pdf-vue3";
 
 const props = defineProps(['address']);

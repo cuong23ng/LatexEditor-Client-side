@@ -1,18 +1,11 @@
 <template>
   <div class="home">
-    <BlogPost v-if="!user" :post="welcomeScreen" />
+    <BlogPost :post="welcomeScreen" />
     <div class="blog-card-wrap">
-      <div class="container">
+      <div v-if="user" class="container">
         <h3>View More Recent Documents</h3>
-        <router-link class="document-card" style="text-decoration: none; align-self: center;" :to="{name: 'documents'}">...</router-link>
-      </div>
-    </div>
-    <div v-if="!user" class="updates">
-      <div class="container">
-        <h2></h2>
-        <router-link class="router-button" :to="{name: 'register'}">
-          Register for HUSTex
-        </router-link>
+        <DocumentCards :project="project" v-for="(project, index) in projects.slice(0, 4)" :key="index"/>
+        <router-link class="document-card" style="text-decoration: none; align-self: center; margin-left: 21px; font-size: 22px" :to="{name: 'documents'}">...</router-link>
       </div>
     </div>
   </div>
@@ -21,13 +14,11 @@
 <script>
 // @ is an alias to /src
 import BlogPost from "../components/BlogPost"
-import BlogCards from "../components/BlogCard"
 import DocumentCards from "../components/DocumentCard.vue"
 export default {
   name: 'home',
   components: { 
     BlogPost, 
-    BlogCards, 
     DocumentCards, 
   },
   data() {
@@ -53,15 +44,12 @@ export default {
     }
   },
   computed: {
-    sampleBlogCards() {
-      return this.$store.state.sampleBlogCards
-    },
-    sampleDocumentCards() {
-      return this.$store.state.sampleDocumentCards
-    },
     user() {
       return this.$store.state.user;
     },
+    projects() {
+      return this.$store.state.projects;
+    }
   }
 }
 </script>

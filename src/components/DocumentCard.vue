@@ -1,16 +1,40 @@
 <template>
   <div class="document-card">
-    <router-link :to="{ name: 'create-latex', query: {projectid: project.ProjectId} }" class="title">{{ project.ProjectName }}</router-link>
+    <router-link v-if="!rename" :to="{ name: 'create-latex', query: {projectid: project.ProjectId, projectname: project.ProjectName} }" class="title">{{ project.ProjectName }}</router-link>
+    <input class="title" v-else :value="project.ProjectName">
     <div class="owner-name">{{ project.UserId }}</div>
     <div class="time-modified">{{ new Date(project.LastModified).toLocaleString("en-us", { dateStyle: "long" }) }}</div>
+    <img @click.prevent="renameProject" class="icon-setting" src="../assets/Icons/rename-black.png">
+    <img @click.prevent="removeProject" class="icon-setting" src="../assets/Icons/delete-black.png">
   </div>
 </template>
 
-<script>
-export default {
-  name: "documentCard",
-  props: ["project"],
-  components: { },
+<script setup>
+import { ref } from 'vue';
+import { useStore } from 'vuex';
+
+const rename = ref(false);
+const props = defineProps(['project']);
+const store = useStore();
+
+async function removeProject() {
+  store.state.projects = await store.state.projects.filter((project) => {
+    return project.ProjectId !== props.project.ProjectId;
+  });
+  var url = `http://localhost:5237/api/delete-project/${store.state.profileId}/${props.project.ProjectId}`;
+  await fetch(url, {
+    method: 'DELETE',
+  }).then((res) => {
+    if (res.ok) {
+      
+    }
+  }).catch((err) => {
+    console.log(err);
+  })
+}
+
+async function renameProject() {
+  rename.value = !rename.value;
 }
 </script>
 
@@ -32,7 +56,7 @@ export default {
 }
 
 .document-card:hover {
-  transform: rotateY(-1deg) scale(1.002);
+  transform: rotateY(-0.2deg) scale(1.0002);
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   background-color: rgba(233, 233, 233, 0.5);
 }
@@ -48,5 +72,16 @@ export default {
 }
 .document-card .time-modified {
   flex: 3;
+}
+
+.icon-setting {
+  width: 22px;
+  opacity: 0.4;
+  margin-right: 9px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+.icon-setting:hover {
+  opacity: 0.9;
 }
 </style>

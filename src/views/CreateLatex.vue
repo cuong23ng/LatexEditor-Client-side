@@ -1,37 +1,61 @@
 <template>
   <div class="latex-editor-window">
+    <ProjectSetting v-if="modalActive" v-on:change-mode="changeModeModal" v-on:create="createNewFile" v-on:import="importFile" :choseNewFile="isNewfile"/>
     <div class="file-info">
-      File info
+      <div style="flex: 5; align-items: center;">
+        <router-link :to="{name: 'documents'}">
+          <img class="icon-setting home-icon" src="../assets/Icons/back.png">
+        </router-link>
+      </div>
+      <div style="flex: 5; display: flex; flex-direction: row; align-items: center;">
+        <div>{{ this.$route.query['projectname'] }}</div>
+        <img class="icon-setting edit-icon" src="../assets/Icons/edit.png">
+      </div>
     </div>
     <div class="create-document" :style="{ height: height }">
       <div class="left-column">
-        <div class="file"></div>
-        <div @click.prevent="showFile(file)" class="file" v-for="(file, index) in files" :key="index">
-          <img v-if="file.DataType === 'tex'" class="icon-file" src="../assets/Icons/file.png" >
-          <img v-else-if="file.DataType === 'pdf'" class="icon-file" src="../assets/Icons/image-icon.png">
-          <img v-else-if="file.DataType === 'bib'" class="icon-file" src="../assets/Icons/bib.png">
-          {{ file.FileName }}.{{ file.DataType }}
-        </div>
         <div class="setting">
-          <div @click.prevent="createNewFile()" title="New File">
-            <img class="icon-setting" src="../assets/Icons/file.png" alt="New file">
+          <div style="display: flex; flex-direction: row">
+            <div @click.prevent="changeModeModal(true)" title="New File">
+              <img class="icon-setting" src="../assets/Icons/file.png" alt="New file">
+            </div>
+            <div title="New Folder">
+              <img class="icon-setting" src="../assets/Icons/folder.png" alt="New folder">
+            </div>
+            <div @click.prevent="changeModeModal(false)" title="Import file">
+              <img class="icon-setting" src="../assets/Icons/import-file.png" alt="Import">
+            </div>
           </div>
-          <div title="New Folder">
-            <img class="icon-setting" src="../assets/Icons/folder.png" alt="New folder">
+          <div style="display: flex; flex-direction: row">
+            <div @click.prevent="deleteFile" title="Rename">
+              <img class="icon-setting" src="../assets/Icons/rename.png" alt="Rename">
+            </div>
+            <div @click.prevent="deleteFile" title="Delete">
+              <img class="icon-setting" src="../assets/Icons/delete.png" alt="Delete">
+            </div>
           </div>
-          <div title="Import file">
-            <img class="icon-setting" src="../assets/Icons/import-file.png" alt="Import">
-          </div>
+        </div>
+        <div class="file"></div>
+        <div @click.prevent="showFile(file)" class="file" :id="file.FileName" v-for="(file, index) in files" :key="index">
+          <img v-if="file.DataType === 'pdf'" class="icon-file" src="../assets/Icons/image-icon.png">
+          <img v-else-if="file.DataType === 'bib'" class="icon-file" src="../assets/Icons/bib.png">
+          <img v-else class="icon-file" src="../assets/Icons/file.png" >
+          {{ file.FileName }}.{{ file.DataType }}
         </div>
       </div>
       <div class="editor">
-        <AceEditor v-if="isTexFile" :content="content" :projectid="projectid" :filename="currentFile" />
+        <AceEditor v-if="isTexFile" :content="content" :projectid="projectid" :filename="currentFile.FileName"/>
         <PreviewView class="show-image" v-if="isPdfFile" :address="content"/>
       </div>
       <div class="preview">
         <Loading v-if="loading" />
         <!-- <button class="save-button">Save</button> -->
-        <button class="compile-button" @click.prevent="compile">Compile</button>
+        <div class="option">
+          <button class="compile-button" @click.prevent="compile">Compile</button>
+          <div>
+            <img class="download-button" src="../assets/Icons/download-black.png">
+          </div>
+        </div>
         <PreviewView :address="address" />
       </div>
     </div>
@@ -42,6 +66,7 @@
 import AceEditor from "../components/AceEditor.vue";
 import PreviewView from "../components/PreviewView.vue";
 import Loading from "../components/LoadingView.vue";
+import ProjectSetting from "../components/ProjectSetting.vue";
 
 export default {
   name: "CreateLatex",
@@ -53,18 +78,22 @@ export default {
       files: [],
       isTexFile: false,
       isPdfFile: false,
+      previousFile: null,
       currentFile: null,
       projectid: this.$route.query['projectid'],
       loading: null,
+      modalActive: false,
+      isNewfile: null,
     }
   },
   components: {
     AceEditor,
     PreviewView,
     Loading,
+    ProjectSetting,
   },
   async created() {
-    var url = 'http://localhost:5237/api/project/' + this.$store.state.profileId + '/' + this.$route.query['projectid'];
+    var url = 'http://localhost:5237/api/files/' + this.$store.state.profileId + '/' + this.$route.query['projectid'];
     
     await fetch(url)
       .then(response => {
@@ -95,7 +124,7 @@ export default {
     async compile() {
       this.loading = true;
       this.address = '';
-      var url = 'http://localhost:5237/api/compile/' + this.$store.state.profileId + '/' + this.$route.query['projectid'] + '/' + this.currentFile;
+      var url = 'http://localhost:5237/api/compile/' + this.$store.state.profileId + '/' + this.$route.query['projectid'] + '/' + this.currentFile.FileName;
       await fetch(url, {
           method: 'GET',
           headers: {
@@ -104,10 +133,12 @@ export default {
         }).then((res) => {
           this.loading = false;
           if (!res.ok) {
-            throw new Error('Network response was not ok');
+            alert("Compile fail!");
           } 
-          this.address = 'http://localhost:5237/Files/' + this.$store.state.profileId + '/' + this.$route.query['projectid'] + '/' + this.currentFile + '.pdf';
-          console.log(this.address);
+          else {
+            this.address = 'http://localhost:5237/Files/' + this.$store.state.profileId + '/' + this.$route.query['projectid'] + '/' + this.currentFile.FileName + '.pdf';
+            console.log(this.address);
+          }
         })
         .catch((err) => {
           this.loading = false;
@@ -116,31 +147,117 @@ export default {
     },
     async showFile(file) {
       try {
-        var url = 'http://localhost:5237/Files/' + this.$store.state.profileId + '/' + this.$route.query['projectid'] + '/' + file.FileName + '.' + file.DataType;
+        this.previousFile = this.currentFile;
+        if (this.previousFile) {
+          document.getElementById(this.previousFile.FileName).classList.remove('highlight-file');
+        }
+        this.currentFile = file;
+        document.getElementById(this.currentFile.FileName).classList.add('highlight-file');
+
+        var url = 'http://localhost:5237/Files/' + this.$store.state.profileId + '/' + this.$route.query['projectid'] + '/' + this.currentFile.FileName + '.' + this.currentFile.DataType;
+
         const response = await fetch(url, {
           method: 'GET',
         });
 
         if (!response.ok) {
           throw new Error('Network response was not ok');
-        } 
-        else if (file.DataType === 'tex') {
-          this.content = await response.text();
-          this.isTexFile = true;
-          this.isPdfFile = false;
-          this.currentFile = file.FileName;
-        }
-        else if (file.DataType === 'pdf') {
-          this.content = url;
-          this.isPdfFile = true;
-          this.isTexFile = false;
+        } else {
+          if (this.currentFile.DataType === 'pdf') {
+            this.content = url;
+            this.isPdfFile = true;
+            this.isTexFile = false;
+          }
+          else {
+            this.content = await response.text();
+            console.log(this.content);
+            this.isTexFile = true;
+            this.isPdfFile = false;
+          }
         }
       } catch (error) {
         console.error('There was a problem with the fetch operation:', error);
       }
     },
-    async createNewFile() {
+    async createNewFile(filename, filetype) {
+      this.changeModeModal();
+      try {
+        var url = `http://localhost:5237/api/create-new-file/${this.$store.state.profileId}/${this.$route.query['projectid']}?filename=${filename}&filetype=${filetype}`;
 
+        console.log(url);
+        const response = await fetch(url, {
+          method: "POST",
+        });
+
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        else {
+          const newfile = {
+            FileName: filename,
+            ProjectId: this.projectid,
+            DataType: filetype
+          };
+          this.files.push(newfile);
+        } 
+      } catch (error) {
+        console.error('There was a problem with the fetch operation:', error);
+      }  
+    },
+    async deleteFile() {
+      try {
+        var url = `http://localhost:5237/api/delete-file/${this.$store.state.profileId}/${this.$route.query['projectid']}?filename=${this.currentFile.FileName}&filetype=${this.currentFile.DataType}`;
+
+        const response = await fetch(url, {
+          method: "DELETE",
+        });
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        else {
+          document.getElementById(this.currentFile.FileName).classList.remove('highlight-file');
+          this.files = this.files.filter((file) => {
+            return file !== this.currentFile;
+          });
+          this.previousFile = null;
+          this.currentFile = null;
+          this.content = '';
+          this.isPdfFile = false;
+          this.isTexFile = false;
+        }
+      }
+      catch (error) {
+        console.error('There was a problem with the fetch operation:', error);
+      }
+    },
+    async importFile(file) {
+      this.changeModeModal();
+      var url = `http://localhost:5237/api/import/${this.$store.state.profileId}/${this.$route.query['projectid']}`;
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await fetch(url, {
+        method: "POST",
+        body: formData
+      });
+
+      if (!response.ok) {
+        throw new Error('Upload failed');
+      }
+      else {
+        const filename = file.name.split('.');
+        const newfile = {
+          FileName: filename[0],
+          ProjectId: this.projectid,
+          DataType: filename[1]
+        };
+        this.files.push(newfile);
+      } 
+    },
+    changeModeModal(isNewfile) {
+      this.modalActive = !this.modalActive;
+      this.isNewfile = isNewfile;
     }
   },
 };
@@ -149,18 +266,46 @@ export default {
 <style lang="scss" scoped>
 .latex-editor-window {
   font-family: 'Arial';
+  position: relative;
 }
 
 .file-info {
-  position: fixed;
+  position: absolute;
   top: 0;
   left: 0;
   right: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   height: 40px;
-  background-color: bisque;
+  color: white;
+  background-color: rgba(53, 53, 53, 1);
   border-bottom-width: 1px;
+  border-bottom-color: rgba(53, 53, 53, 0.6);
   border-bottom-style: solid;
   z-index: 1000;
+}
+
+.file-info .home-icon {
+  margin-left: 10px;
+  width: 28px;
+  opacity: 0.6;
+  cursor: pointer;
+  transition: 0.1s;
+}
+.file-info .home-icon:hover {
+  opacity: 0.8;
+}
+
+.file-info .edit-icon {
+  margin-left: 3px;
+  width: 16px;
+  opacity: 0.2;
+  cursor: pointer;
+  transition: 0.1s;
+}
+.file-info .edit-icon:hover {
+  opacity: 0.8;
 }
 
 .create-document {
@@ -174,11 +319,12 @@ export default {
   flex: 15 1 0px;
   overflow: hidden;
   height: 100%;
-  background-color: rgb(53, 53, 53);
+  background-color: rgb(51, 51, 51);
   position: relative;
 }
 
 .file {
+  font-family: Arial, Helvetica, sans-serif;
   display: flex;
   font-size: 13px;
   height: 32px;
@@ -189,7 +335,15 @@ export default {
   cursor: pointer;
   padding-left: 7px;
   border-radius: 2px;
-  transition: 0.8ms;
+}
+.file:hover {
+  transition: 0.1s;
+  background-color: rgba(15, 99, 167, 0.5);
+}
+
+.highlight-file {
+  transition: 0.3s;
+  background-color: rgba(15, 99, 167, 0.7);
 }
 
 .icon-file {
@@ -198,13 +352,11 @@ export default {
   opacity: 0.4;
 }
 
-.file:hover {
-  background-color: rgba(15, 99, 167, 1);
-}
-
 .setting {
   display: flex;
+  flex-direction: row;
   align-items: center;
+  justify-content: space-between;
   position: absolute;
   top: 0;
   width: 100%;
@@ -253,11 +405,24 @@ export default {
   position: relative;
 }
 
-.save-button,
-.compile-button {
+.option {
   position: absolute;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  z-index: 100;
+}
+
+.option .compile-button {
+  font-size: 11px;
   margin-left: 9px;
   margin-top: 12px;
-  z-index: 100;
+}
+
+.option .download-button {
+  margin-left: 6px;
+  margin-top: 18px;
+  width: 32px;
+  opacity: 0.6;
 }
 </style>

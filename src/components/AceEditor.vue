@@ -1,7 +1,8 @@
 <script setup>
-    import { ref, onMounted, onBeforeUnmount, defineProps, computed, watch, toRef } from 'vue';
+    import { ref, onMounted, onBeforeUnmount, watch, toRef } from 'vue';
     import { VAceEditor } from 'vue3-ace-editor';
     import 'ace-builds/src-noconflict/mode-latex'; // Load the language definition file used below
+    import 'ace-builds/src-noconflict/mode-bibtex';
     import 'ace-builds/src-noconflict/theme-textmate'; // Load the theme definition file used below
     import { useStore } from 'vuex';
 

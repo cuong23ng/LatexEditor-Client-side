@@ -6,8 +6,8 @@
         <h2 v-else>{{ post.title }}</h2>
         <p v-if="post.welcomeScreen">{{ post.blogPost }}</p>
         <p class="content-preview" v-else>{{ post.blogHTML }}</p>
-        <router-link class="link link-light" v-if="post.welcomeScreen" :to="{name: 'login'}">Login/Register</router-link>
-        <router-link class="link" v-else to="#">View the Post</router-link>
+        <router-link class="link link-light" v-if="!user" :to="{name: 'login'}">Login/Register</router-link>
+        <router-link class="link link-light" v-else :to="{name: 'documents'}">View the Document</router-link>
       </div>
     </div>
     <div class="blog-photo">
@@ -21,7 +21,12 @@
 export default {
   name: "blogPost",
   props: ["post"],
-  components: {}
+  components: {},
+  computed: {
+    user() {
+      return this.$store.state.user;
+    }
+  }
 }
 </script>
 

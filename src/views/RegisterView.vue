@@ -4,7 +4,7 @@
       <form class="register">
         <p class="login-register">
           Already have an account?
-          <router-link class="router-link" :to="{name: 'register'}">Login</router-link>
+          <router-link class="router-link" :to="{name: 'login'}">Login</router-link>
         </p>
         <h2>Create your HUS<span style="color: red;">Tex</span> account</h2>
         <div class="inputs">
@@ -54,25 +54,6 @@ export default {
       if ( this.email !== "" && this.password !== "" && this.firstName !== "" && this.lastName !== "" && this.username !== "") {
         this.error = false;
         this.errorMsg = "";
-        
-        // await createUserWithEmailAndPassword(auth, this.email, this.password).then((userCredential) => {
-        //   const firstName = userCredential.firstName;
-        //   const lastName = userCredential.lastName;
-        //   const username = userCredential.username;
-        //   const email = userCredential.email;
-        // })
-        // .catch((error) => {
-        //   const errorCode = error.code;
-        //   const errorMessage = error.message;
-        //   // ..
-        // });
-        
-        // addDoc(colRef, {
-        //   firstName: this.firstName,
-        //   lastName: this.firstName,
-        //   username: this.username,
-        //   email: this.email,
-        // });
 
         const formData = new FormData(formEl);
         const data = new URLSearchParams(formData);

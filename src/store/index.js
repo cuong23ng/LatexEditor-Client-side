@@ -2,50 +2,6 @@ import { createStore } from 'vuex'
 
 export default createStore({
   state: {
-    sampleBlogCards: [
-      { 
-        blogTitle: "Blog Card #1", 
-        blogCoverPhoto: "stock-1", 
-        blogDate: "May 1, 2024" 
-      },
-      { 
-        blogTitle: "Blog Card #2", 
-        blogCoverPhoto: "stock-2", 
-        blogDate: "May 1, 2024" 
-      },
-      { 
-        blogTitle: "Blog Card #3", 
-        blogCoverPhoto: "stock-3", 
-        blogDate: "May 1, 2024" 
-      },
-      { 
-        blogTitle: "Blog Card #4", 
-        blogCoverPhoto: "stock-4", 
-        blogDate: "May 1, 2024" 
-      },
-    ],
-    sampleDocumentCards: [
-      {
-        title: "helloworld",
-        owner: "cuong nguyen",
-        lastModified: "3 hours ago",
-      },
-      {
-        title: "helloearth",
-        owner: "bong nguyen",
-        lastModified: "2 hours ago",
-      },
-      {
-        title: "hellopeople",
-        owner: "hoang nguyen",
-        lastModified: "5 hours ago",
-      },
-      {
-        title: "hellosummer",
-        owner: "hoang tran",
-        lastModified: "6 hours ago",
-      },
-    ],
     editPost: null,
     user: null,
     profileEmail: null,
@@ -58,10 +14,6 @@ export default createStore({
   getters: {
   },
   mutations: {
-    toggleEditPost(state, payload) {
-      state.editPost = payload;
-      console.log(state.editPost);
-    },
     setProfileInfo(state, payload) {
       state.profileId = payload.UserId;
       state.profileFirstName = payload.FirstName;
@@ -78,19 +30,24 @@ export default createStore({
       state.profileEmail = "";
       state.profileInitials = "";
       state.user = false;
+      state.projects = [];
       console.log("sign out");
     },
     setUserProjects(state, projects) {
       state.projects = projects;
+    },
+    addProject(state, project) {
+      state.projects.push(project);
     }
   },
   actions: {
     async getCurrentUser({ commit }, user) {
       commit('setProfileInfo', user);
+      localStorage.setItem('profileId', this.state.profileId);
       this.dispatch('getProject');
     },
     async getProject({ commit }) {
-      await fetch('http://localhost:5237/api/project/2')
+      await fetch(`http://localhost:5237/api/project/${this.state.profileId}`)
       .then(response => {
         if (!response.ok) {
             throw new Error('Network response was not ok');
@@ -106,5 +63,6 @@ export default createStore({
     }
   },
   modules: {
+
   }
 })

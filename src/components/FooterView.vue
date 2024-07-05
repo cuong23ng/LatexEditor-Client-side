@@ -9,7 +9,8 @@
         <div class="col-2">
           <ul>
             <router-link class="link" :to="{name: 'home'}">Home</router-link>
-            <router-link class="link" :to="{name: 'documents'}">Documents</router-link>
+            <router-link v-if="user" class="link" :to="{name: 'documents'}">Documents</router-link>
+            <router-link v-else class="link" :to="{name: 'documents'}">Documents</router-link>
             <router-link class="link" :to="{name: 'create-latex'}">Create LaTeX</router-link>
             <router-link class="link" :to="{name: 'login'}">Login/Register</router-link>
           </ul>

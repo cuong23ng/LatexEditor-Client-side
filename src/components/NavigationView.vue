@@ -7,7 +7,8 @@
       <div class="nav-links">
         <ul v-show="!mobile">
           <router-link class="link" :to="{name: 'home'}">Home</router-link>
-          <router-link class="link" :to="{name: 'documents'}">Documents</router-link>
+          <router-link v-if="user" class="link" :to="{name: 'documents'}">Documents</router-link>
+          <router-link v-else class="link" :to="{name: 'login'}">Documents</router-link>
           <router-link class="link" :to="{name: 'create-latex'}">Create LaTeX</router-link>
           <router-link v-if="!user" class="link" :to="{name: 'login'}">Login/Register</router-link>
         </ul>
@@ -54,7 +55,6 @@
 </template>
 
 <script>
-import { signOut } from 'firebase/auth';
 import menuIcon from '../assets/Icons/bars-regular.svg';
 
 export default {

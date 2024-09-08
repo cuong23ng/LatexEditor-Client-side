@@ -17,11 +17,19 @@ Vue 3
 ASP.NET Core in .NET 8.0
 
 ### Installation
+
+#### Client side
 1. Clone the repository: https://github.com/cuong23ng/LatexEditor-Client-side/tree/main
 2. Navigate into the directory: ``` cd LatexEditor-Client-side ```
 3. Project setup: ``` npm install ```
 4. Compiles and hot-reloads for development: ``` npm run serve ```
 5. Compiles and minifies for production: ``` npm run build ```
+
+#### Server side
+1. Clone the repository: https://github.com/cuong23ng/LatexEditor-Server-side
+2. Navigate into the directory: ``` cd LatexEditor-Server-side ```
+3. Project setup: ``` dotnet install ```
+4. Run source code: ``` dotnet run ```
 
 ### Customize configuration
 See [Configuration Reference](https://cli.vuejs.org/config/).

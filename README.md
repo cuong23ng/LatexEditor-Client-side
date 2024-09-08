@@ -13,8 +13,8 @@ List the key features of this LaTeX editor
 ## Getting Started
 
 ### Prerequisites
-Vue 3
-ASP.NET Core in .NET 8.0
+* Vue 3
+* ASP.NET Core in .NET 8.0
 
 ### Installation
 

@@ -1,25 +1,49 @@
-# LATEX COMPILER - HUSTEX
+# LATEX EDITOR - HUSTEX
 
 ## Overview
-The "Latex Renderer" project aims to build an online LaTeX editing tool with a Vue.js front-end and ASP.NET backend. It includes a LaTeX compiler for users to write, compile, and render LaTeX documents directly on the website. Additionally, the platform features user management and role assignment, allowing administrators to control access and permissions for different users. The project combines a user-friendly interface with robust backend support to provide an efficient LaTeX editing experience.
+The HUSTEX project aims to build an online LaTeX editing tool with a Vue.js front-end and an ASP.NET backend. It integrates a LaTeX compiler, enabling users to write, compile, and render LaTeX documents directly through the website. The platform also includes user management and role assignment, with each user having their own dedicated folder on the server for file storage. Combining a user-friendly interface with robust backend support, the project seeks to provide an efficient and personalized LaTeX editing experience.
 
+## Features
+List the key features of this LaTeX editor
+* Register / Login
+* View project
+* Editor / Compiler
+* Preview
 
-# hustex
+## Getting Started
 
-## Project setup
-```
-npm install
-```
+### Prerequisites
+Vue 3
+ASP.NET Core in .NET 8.0
 
-### Compiles and hot-reloads for development
-```
-npm run serve
-```
-
-### Compiles and minifies for production
-```
-npm run build
-```
+### Installation
+1. Clone the repository: https://github.com/cuong23ng/LatexEditor-Client-side/tree/main
+2. Navigate into the directory: ``` cd LatexEditor-Client-side ```
+3. Project setup: ``` npm install ```
+4. Compiles and hot-reloads for development: ``` npm run serve ```
+5. Compiles and minifies for production: ``` npm run build ```
 
 ### Customize configuration
 See [Configuration Reference](https://cli.vuejs.org/config/).
+
+## Demo Usage
+
+### Home View
+![image](https://github.com/user-attachments/assets/da658607-02fd-48c0-9570-bafe86ea2bc4)
+
+### Login/Register View
+![image](https://github.com/user-attachments/assets/98a64afb-103f-43cc-ac04-3bcb689f3d5d)
+![image](https://github.com/user-attachments/assets/c69890f9-0d83-4d98-92b1-6203398e3172)
+
+### See Projects
+![image](https://github.com/user-attachments/assets/2e8b41f7-49f0-4f94-b072-510bd71caecb)
+
+### Editor and Preview
+![image](https://github.com/user-attachments/assets/86a4a0db-1f8d-4f2b-9dd8-4d60db6ca89e)
+
+
+
+
+
+
+

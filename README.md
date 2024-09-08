@@ -1,7 +1,7 @@
 # LATEX EDITOR - HUSTEX
 
 ## Overview
-The HUSTEX project aims to build an online LaTeX editing tool with a Vue.js front-end and an ASP.NET backend. It integrates a LaTeX compiler, enabling users to write, compile, and render LaTeX documents directly through the website. The platform also includes user management and role assignment, with each user having their own dedicated folder on the server for file storage. Combining a user-friendly interface with robust backend support, the project seeks to provide an efficient and personalized LaTeX editing experience.
+The HUSTEX project aims to build an online LaTeX editing tool with a Vue.js front-end and an ASP.NET backend. It integrates a LaTeX compiler, enabling users to write, compile, and render LaTeX documents directly through the website. The platform also includes user management with each user having their own dedicated folder on the server for file storage. Combining a user-friendly interface with robust backend support, the project seeks to provide an efficient and personalized LaTeX editing experience.
 
 ## Features
 List the key features of this LaTeX editor
